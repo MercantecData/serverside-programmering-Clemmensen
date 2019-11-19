@@ -36,8 +36,6 @@ var server = http.createServer((req, res) => {
             if (exists) {
                 res.write(fs.readFileSync(subPage));
 
-                console.log(subPage);
-
                 outputFolderContent(reqFile, res, () => {
                     res.end();
                 });
