@@ -16,16 +16,21 @@ var server = http.createServer((req, res) => {
 
 
     var urlParsed = url.parse(req.url);
-    var reqFile = wwwMain + urlParsed.pathname.replace("/", "\\");
+    var reqFile = wwwMain + urlParsed.pathname.replace(/[/]/g, "\\");
     console.log("Req file: '" + reqFile + "'");
 
 
 
-    // Frontpage
-    if (req.url == "/") {
-        res.setHeader("content-type", "text/html")
+    // Frontpage that shows directory listing
+    if (reqFile == ".\\www\\") {
+        res.setHeader("content-type", "text/html");
+
         fs.readdir(wwwMain, (err, files) => {
             files.forEach(file => {
+
+                // TODO: Do a better fix for identifying folders using fs
+                if (file.indexOf(".") == -1)
+                    file += "/";
 
                 res.write("<a href=\"" + file + "\" target=\"_blank\">" + file + "</a><br>");
 
@@ -35,24 +40,26 @@ var server = http.createServer((req, res) => {
     }
 
     // SubPage for folder listings
-    if (reqFile.endsWith("\\"){
+    else if (reqFile.endsWith("\\")) {
+        res.setHeader("content-type", "text/html");
 
-        res.end();
+        subPage = reqFile + defaultPage;
+        fs.exists(subPage, (exists) => {
+
+            if (exists) {
+                res.write("\"" + subPage + "\" contents:");
+                res.write(fs.readFileSync(subPage));
+            }
+            else {
+                res.statusCode = 404;
+            }
+            res.end();
+        });
     }
 
-
-
-
-
+    // Not found
     else {
-//        var fileRequested = fs.existsSync()
-        //      if()
-
+        res.statusCode = 404;
         res.end();
     }
-});
-
-
-server.listen(webserverPort, () => {
-    console.log("Listening on machine at port " + webserverPort);
-});
+}).listen(webserverPort);
