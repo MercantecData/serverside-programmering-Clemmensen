@@ -1,4 +1,5 @@
 var fs = require("fs");
+var url = require("url");
 
 exports.listFolderContent = function (path, callback) {
     var directoryContent = {};
@@ -14,9 +15,8 @@ exports.listFolderContent = function (path, callback) {
         }
 
         files.forEach(file => {
-
-            // TODO: Do a better fix for identifying folders using fs
-            if (file.indexOf(".") == -1) {
+            var localFileEntry = decodeURIComponent(url.pathToFileURL(path + "/" + file).pathname.substr(1));
+            if(fs.lstatSync(localFileEntry).isDirectory()){
                 file += "/";
             }
 
