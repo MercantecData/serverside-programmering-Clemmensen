@@ -2,7 +2,7 @@
 var http = require("http");
 var url = require("url");
 var fs = require("fs");
-
+var getContentType = require(".\\Modules\\mimetypes").getContentTypeByExt;
 
 // Configuration
 var webserverPort = 8080;
@@ -11,15 +11,8 @@ var defaultPage = "index.html";
 
 
 var server = http.createServer((req, res) => {
-    console.log("--- Request start ---");
-    console.log("Req url: '" + req.url + "'");
-
-
     var urlParsed = url.parse(req.url);
     var reqFile = wwwMain + urlParsed.pathname.replace(/[/]/g, "\\");
-    console.log("Req file: '" + reqFile + "'");
-
-
 
     // Frontpage that shows directory listing
     if (reqFile == ".\\www\\") {
@@ -46,9 +39,9 @@ var server = http.createServer((req, res) => {
 
 // SubPage for folder listings
     else if (reqFile.endsWith("\\")) {
-        res.setHeader("content-type", "text/html");
-
         subPage = reqFile + defaultPage;
+
+        res.setHeader("content-type", getContentType(subPage.split(".").pop()));
         fs.exists(subPage, (exists) => {
 
             if (exists) {
@@ -62,18 +55,22 @@ var server = http.createServer((req, res) => {
         });
     }
 
-    // Not found
-    else {
 
+    else {
         fs.exists(reqFile, (exists) => {
 
+            // Output file data
             if (exists) {
+                res.setHeader("content-type", getContentType(reqFile.split(".").pop()));
                 res.write(fs.readFileSync(reqFile));
             }
+
+            // File  was not found
             else {
                 res.statusCode = 404;
             }
             res.end();
         });
     }
+
 }).listen(webserverPort);
