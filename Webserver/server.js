@@ -17,26 +17,23 @@ var server = http.createServer((req, res) => {
     var urlParsed = url.parse(req.url);
     var reqFile = wwwMain + urlParsed.pathname;
 
-    // Frontpage that shows directory listing
-    if (reqFile == "./www/") {
-        res.setHeader("content-type", "text/html");
+    // index.html (main) pages
+    if (reqFile.endsWith("/") || reqFile.endsWith("/" + defaultPage)) {
 
-        res.write("<h1>Front page</h1>");
-        outputFolderContent(wwwMain, res, () => {
-            res.end();
-        });
-    }
+        // Set the requested page to subfolder to allow combined transversal of folder content
+        if (reqFile.endsWith("/" + defaultPage))
+            reqFile = reqFile.substring(0, reqFile.indexOf("/" + defaultPage)+1);
 
-    // SubPage for folder listings
-    else if (reqFile.endsWith("/")) {
-        subPage = reqFile + defaultPage;
-        res.setHeader("content-type", getContentType(subPage.split(".").pop()));
+        var indexPage = reqFile + defaultPage;
+        res.setHeader("content-type", getContentType(indexPage.split(".").pop()));
 
-        fs.exists(subPage, (exists) => {
+        fs.exists(indexPage, (exists) => {
             if (exists) {
-                res.write(fs.readFileSync(subPage));
+                res.write(fs.readFileSync("./design/header.html"));
+                res.write(fs.readFileSync(indexPage));
 
                 outputFolderContent(reqFile, res, () => {
+                    res.write(fs.readFileSync("./design/footer.html"));
                     res.end();
                 });
             }
