@@ -25,21 +25,26 @@ var server = http.createServer((req, res) => {
     if (reqFile == ".\\www\\") {
         res.setHeader("content-type", "text/html");
 
+
+        // TODO: Move to method showing folder content
         fs.readdir(wwwMain, (err, files) => {
+            res.write("Folder content:<br>")
             files.forEach(file => {
 
                 // TODO: Do a better fix for identifying folders using fs
-                if (file.indexOf(".") == -1)
+                if (file.indexOf(".") == -1) {
                     file += "/";
+                }
 
-                res.write("<a href=\"" + file + "\" target=\"_blank\">" + file + "</a><br>");
-
-            });
-            res.end();
+                res.write("<a href=\"" + file + "\" " +
+                    ((!file.endsWith("/") && !file.endsWith(".html")) ? "target=\"_blank\"" : "") +
+                    "> " + file + "</a > <br>");
         });
-    }
+        res.end();
+    });
+}
 
-    // SubPage for folder listings
+// SubPage for folder listings
     else if (reqFile.endsWith("\\")) {
         res.setHeader("content-type", "text/html");
 
@@ -59,7 +64,16 @@ var server = http.createServer((req, res) => {
 
     // Not found
     else {
-        res.statusCode = 404;
-        res.end();
+
+        fs.exists(reqFile, (exists) => {
+
+            if (exists) {
+                res.write(fs.readFileSync(reqFile));
+            }
+            else {
+                res.statusCode = 404;
+            }
+            res.end();
+        });
     }
 }).listen(webserverPort);
