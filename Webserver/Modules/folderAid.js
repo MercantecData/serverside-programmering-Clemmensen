@@ -27,17 +27,18 @@ exports.listFolderContent = function (path, callback) {
         callback(directoryContent);
     });
 }
-/*
-exports.outputFolderContent = funtion(path, res, callback){
-    exports.listFolderContent
-    if (dir.error != null) {
-        res.write("No folder content was found");
-    } else {
-        dir.fileEntities.forEach(fileLink => {
-            res.write(fileLink);
-        });
-    }
-}
-outputFolderContent(wwwMain, (dir) => {
 
-});*/
+exports.outputFolderContent = function (path, res, callback) {
+    res.write("Folder contents:<br>");
+
+    exports.listFolderContent(path, (dir) => {
+        if (dir.error != null) {
+            res.write("No folder content was found");
+        } else {
+            dir.fileEntities.forEach(fileLink => {
+                res.write(fileLink);
+            });
+        }
+        callback();
+    });
+}

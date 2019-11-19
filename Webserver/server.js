@@ -5,51 +5,47 @@ var fs = require("fs");
 
 // Module methods
 var getContentType = require("./Modules/mimetypes").getContentTypeByExt;
-var listFolderContent = require("./Modules/folderAid").listFolderContent;
+var outputFolderContent = require("./Modules/folderAid").outputFolderContent;
 
 // Configuration
 var webserverPort = 8080;
-var wwwMain = ".\\www";
+var wwwMain = "./www";
 var defaultPage = "index.html";
 
 
 var server = http.createServer((req, res) => {
     var urlParsed = url.parse(req.url);
-    var reqFile = wwwMain + urlParsed.pathname.replace(/[/]/g, "\\");
+    var reqFile = wwwMain + urlParsed.pathname;
 
     // Frontpage that shows directory listing
-    if (reqFile == ".\\www\\") {
+    if (reqFile == "./www/") {
         res.setHeader("content-type", "text/html");
 
-        listFolderContent(wwwMain, (dir) => {
-            
-            if (dir.error != null) {
-                res.write("No folder content was found");
-                res.end();
-            } else {
-                dir.fileEntities.forEach(fileLink => {
-                    res.write(fileLink);
-                });
-                res.end();
-            }
+        res.write("<h1>Front page</h1>");
+        outputFolderContent(wwwMain, res, () => {
+            res.end();
         });
     }
 
     // SubPage for folder listings
-    else if (reqFile.endsWith("\\")) {
+    else if (reqFile.endsWith("/")) {
         subPage = reqFile + defaultPage;
-
         res.setHeader("content-type", getContentType(subPage.split(".").pop()));
-        fs.exists(subPage, (exists) => {
 
+        fs.exists(subPage, (exists) => {
             if (exists) {
-                res.write("\"" + subPage + "\" contents:");
                 res.write(fs.readFileSync(subPage));
+
+                console.log(subPage);
+
+                outputFolderContent(reqFile, res, () => {
+                    res.end();
+                });
             }
             else {
                 res.statusCode = 404;
+                res.end();
             }
-            res.end();
         });
     }
 
