@@ -2,35 +2,31 @@
 var http = require("http");
 var mysql = require("mysql");
 
-// Custom modules
-var dbconnection = require("./Controllers/Database/dbConnection");
 
+// Custom modules
+var dbConnection = require("./Controllers/Database/dbConnection");
+var pageSelector = require("./Controllers/Pages/pageController");
+
+
+// Runs server and calls controller to handle page query
 var serverInit = (conn) => {
     http.createServer((req, res) => {
-
-
-        if (req.url == "/rooms") {
-            conn.query("SELECT * FROM rooms", (err, data) => {
-
-                // TODO handle err
-                if (err) {
-                    res.statusCode = 500;
-                    console.log(JSON.stringify(err));
-                }
-                else {
-                    res.write(JSON.stringify(data));
-                }
-                res.end();
-            });
-        }
-
-        else {
-            res.statusCode = 404;
-            res.end();
-        }
-
+        pageSelector.handleQuery(req, res, conn, checkSuccess);
     }).listen(8080);
 }
 
+
 // Initialize db connection and call server start
-dbconnection.connect(serverInit);
+dbConnection.connect(serverInit);
+
+
+// Set a not found code if no page was found
+var checkSuccess = (req, res, pageFound) => {
+    if (!pageFound) {
+        console.log("404, " + req.url);
+        res.statusCode = 404;
+        res.end();
+    } else {
+        res.end();
+    }
+}
