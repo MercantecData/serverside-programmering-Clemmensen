@@ -1,12 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Intro",
-    "\\WebServer",
-    "\\WebServer\\modules",
-    "\\WebServer\\www",
-    "\\WebServer\\www\\games"
+    "\\REST-API",
+    "\\REST-API\\modules"
   ],
-  "SelectedNode": "\\WebServer\\modules\\folderAid.js",
+  "SelectedNode": "\\REST-API",
   "PreviewInSolutionExplorer": false
 }
