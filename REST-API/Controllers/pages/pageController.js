@@ -1,6 +1,6 @@
 // Controllers for url end points
 var apiPages = {
-    "/rooms": require("./rooms")
+    "/rooms": require("./rooms"),
     "/bookings": require("./bookings")
 }
 
