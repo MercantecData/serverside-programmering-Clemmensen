@@ -13,6 +13,7 @@ exports.handleQuery = (req, res, conn, callbackServer) => {
         callbackServer(req, res, false);
     }
     else {
+        res.setHeader("content-type", "text/json");
         apiPages[req.url].controller(req, res, conn, callbackServer);
     }
 }
