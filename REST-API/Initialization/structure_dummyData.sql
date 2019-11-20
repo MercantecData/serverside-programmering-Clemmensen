@@ -24,10 +24,16 @@ CREATE TABLE room_bookings (
 /* Stored procedures */
 DROP PROCEDURE IF EXISTS GetBookings;
 DELIMITER //
-CREATE PROCEDURE GetBookings(IN startDay INT, endDay INT)
+CREATE PROCEDURE GetBookings(IN startDay INT, startMonth INT, startYear INT, endDay INT, endMonth INT, endYear INT)
 BEGIN
-	SELECT * FROM room_bookings WHERE
-    	(DAY(StartTime) >= startDay OR startDay = 0) AND (DAY(EndTime) <= endDay);
+
+	IF startDay > 0 AND startMonth > 0 AND startYear > 0 THEN
+		SELECT * FROM room_bookings WHERE ((StartTime >= STR_TO_DATE(concat(startYear,startMonth,startDay),'%Y%m%d %h%i')) AND (EndTime <= STR_TO_DATE(concat(endYear,endMonth,endDay),'%Y%m%d %h%i')));
+	ELSE
+		SELECT * FROM room_bookings WHERE (startDay = 0 OR (DAY(StartTime) >= startDay) AND (DAY(EndTime) <= endDay))
+			AND	(startMonth = 0 OR (MONTH(StartTime) >= startMonth) AND (MONTH(EndTime) <= endMonth));
+	END IF;		
+
 END //
 DELIMITER ;
 
@@ -37,8 +43,8 @@ INSERT INTO rooms (RoomName, FloorLocation)
 	VALUES ('Windows', 0), ('Beatles', 0);
 
 INSERT INTO room_bookings (RoomId, StartTime, EndTime)
-	VALUES	(1, '2019-11-20-12:00', '2019-11-20-13:00'),
-			(1, '2019-11-20-13:00', '2019-11-20-15:00'),
+	VALUES	(1, '2018-11-20-12:00', '2018-11-20-13:00'),
+			(1, '2019-10-20-13:00', '2019-10-20-15:00'),
 			(1, '2019-11-20-8:00', '2019-11-20-10:00'),
 			(2, '2019-11-20-11:00', '2019-11-20-13:00'),
 			(2, '2019-11-20-7:00', '2019-11-20-8:00'),

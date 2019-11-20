@@ -1,9 +1,10 @@
 var url = require("url");
 
-exports.controller = async (req, res, conn, callbackServer) => {
+exports.controller = (req, res, conn, callbackServer) => {
 
 
     var parsedUrl = url.parse(req.url, true);
+
 
     var startDay = parsedUrl.query["day"] ? parsedUrl.query["day"] : 0;
     var startMonth = parsedUrl.query["month"] ? parsedUrl.query["month"] : 0;
@@ -13,9 +14,9 @@ exports.controller = async (req, res, conn, callbackServer) => {
     var endMonth = parsedUrl.query["endMonth"] ? parsedUrl.query["endMonth"] : startMonth;
     var endYear = parsedUrl.query["endYear"] ? parsedUrl.query["endYear"] : startYear;
 
-    await conn.query("CALL GetBookings(?, ?)", [startDay, endDay], (err, data) => {
+    conn.query("CALL GetBookings(?, ?, ?, ?, ?, ?)", [startDay, startMonth, startYear, endDay, endMonth, endYear], (err, data) => {
         if (err) {
-            res.statusCode = 500;
+            res.statusCode = (err.code == "ER_SP_WRONG_NO_OF_ARGS" ? 400 : 500);
             console.log(JSON.stringify(err));
         }
         else {
