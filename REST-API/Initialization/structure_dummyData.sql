@@ -21,6 +21,15 @@ CREATE TABLE room_bookings (
 );
 
 
+/* Stored procedures */
+DROP PROCEDURE IF EXISTS GetBookings;
+DELIMITER //
+CREATE PROCEDURE GetBookings(IN startDay INT, endDay INT)
+BEGIN
+	SELECT * FROM room_bookings WHERE
+    	(DAY(StartTime) >= startDay OR startDay = 0) AND (DAY(EndTime) <= endDay);
+END //
+DELIMITER ;
 
 
 /* Dummy data */
@@ -32,7 +41,11 @@ INSERT INTO room_bookings (RoomId, StartTime, EndTime)
 			(1, '2019-11-20-13:00', '2019-11-20-15:00'),
 			(1, '2019-11-20-8:00', '2019-11-20-10:00'),
 			(2, '2019-11-20-11:00', '2019-11-20-13:00'),
-			(2, '2019-11-20-7:00', '2019-11-20-8:00');
+			(2, '2019-11-20-7:00', '2019-11-20-8:00'),
+			(1, '2019-11-22-13:00', '2019-11-22-15:00'),
+			(1, '2019-11-21-8:00', '2019-11-21-10:00'),
+			(2, '2019-11-23-11:00', '2019-11-23-13:00'),
+			(2, '2019-11-23-7:00', '2019-11-23-8:00');
 
 
 
