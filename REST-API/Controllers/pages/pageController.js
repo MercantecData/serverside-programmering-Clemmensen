@@ -6,16 +6,18 @@ var apiPages = {
 
 
 // Look for controller for desired page
-exports.handleQuery = (req, res, conn, callbackServer) => {
+exports.handleQuery = (req, res, conn) => {
 
 	// Check if main page handler is defined - using high url path selection
     var baseApiSelector = "/" + req.url.split("?")[0].split("/")[1];
 
     if (!(baseApiSelector in apiPages)) {
-        callbackServer(req, res, false);
+        console.log("404, " + req.url);
+        res.statusCode = 404;
+        res.end();
     }
     else {
         res.setHeader("content-type", "text/json");
-        apiPages[baseApiSelector].controller(req, res, conn, callbackServer);
+        apiPages[baseApiSelector].controller(req, res, conn);
     }
 }

@@ -2,15 +2,17 @@ var url = require("url");
 var pageIdentifier = "/bookings";
 
 // Select sub api controller endpoints
-exports.controller = (req, res, conn, callbackServer) => {
+exports.controller = (req, res, conn) => {
     var subApiSelector = req.url.split("?")[0].split("/")[2] + ";" + req.method;
 
     if (!(subApiSelector in apiSubQueries)) {
-        callbackServer(req, res, false);
+        console.log("404, " + req.url);
+        res.statusCode = 404;
+        res.end();
     }
     else {
         res.setHeader("content-type", "text/json");
-        apiSubQueries[subApiSelector].run(req, res, conn, callbackServer);
+        apiSubQueries[subApiSelector].run(req, res, conn);
     }
 }
 
@@ -21,7 +23,7 @@ exports.controller = (req, res, conn, callbackServer) => {
 //http://localhost:8080/bookings?year=2018
 //http://localhost:8080/bookings?day=20&year=2018&month=11&endDay=21&endMonth=11&endYear=2019
 var displayBookings = {
-    run(req, res, conn, callbackServer) {
+    run(req, res, conn) {
         var parsedUrl = url.parse(req.url, true);
 
         console.log(parsedUrl);
@@ -43,14 +45,14 @@ var displayBookings = {
                 res.write(JSON.stringify(data));
             }
 
-            callbackServer(req, res, true);
+            res.end();
         });
     }
 };
 
 // Add a new booking to the system
 var addBooking = {
-    run(req, res, conn, callbackServer) {
+    run(req, res, conn) {
         var parsedUrl = url.parse(req.url, true);
 
         var roomId = parsedUrl.query["roomId"];
@@ -61,7 +63,7 @@ var addBooking = {
             res.statusCode = 400;
         }
 
-        callbackServer(req, res, true);
+        res.end();
     }
 };
 

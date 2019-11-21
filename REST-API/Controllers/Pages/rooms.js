@@ -9,6 +9,6 @@ exports.controller = (req, res, conn, callbackServer) => {
             res.write(JSON.stringify(data));
         }
         
-        callbackServer(req, res, true);
+        res.end();
     });
 }
