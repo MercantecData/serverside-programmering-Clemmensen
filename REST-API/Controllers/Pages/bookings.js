@@ -1,5 +1,4 @@
 var url = require("url");
-var pageIdentifier = "/bookings";
 
 // Select sub api controller endpoints
 exports.controller = (req, res, conn) => {
@@ -8,10 +7,9 @@ exports.controller = (req, res, conn) => {
     if (!(subApiSelector in apiSubQueries)) {
         console.log("404, " + req.url);
         res.statusCode = 404;
-        res.end();
+        res.end("{\"error\": \"Requested page was not found\"}");
     }
     else {
-        res.setHeader("content-type", "text/json");
         apiSubQueries[subApiSelector].run(req, res, conn);
     }
 }
@@ -39,13 +37,12 @@ var displayBookings = {
         conn.query("CALL GetBookings(?, ?, ?, ?, ?, ?)", [startDay, startMonth, startYear, endDay, endMonth, endYear], (err, data) => {
             if (err) {
                 res.statusCode = (err.code == "ER_SP_WRONG_NO_OF_ARGS" ? 400 : 500);
+                res.end("{\"error\": \"Invalid combination of query parameters\"}");
                 console.log(JSON.stringify(err));
             }
             else {
-                res.write(JSON.stringify(data));
+                res.end(JSON.stringify(data));
             }
-
-            res.end();
         });
     }
 };
@@ -61,9 +58,8 @@ var addBooking = {
 
         if (roomId == undefined || fromDate == undefined || toDate == undefined) {
             res.statusCode = 400;
+            res.end("{\"error\": \"Required parameters are missing\"}");
         }
-
-        res.end();
     }
 };
 

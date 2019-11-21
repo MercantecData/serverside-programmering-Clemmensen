@@ -11,6 +11,7 @@ var pageSelector = require("./Controllers/Pages/pageController");
 // Runs server and calls controller to handle page query
 var serverInit = (conn) => {
     http.createServer((req, res) => {
+        res.setHeader("content-type", "text/json");
         pageSelector.handleQuery(req, res, conn);
     }).listen(8080);
 }

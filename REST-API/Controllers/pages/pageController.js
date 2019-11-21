@@ -14,10 +14,9 @@ exports.handleQuery = (req, res, conn) => {
     if (!(baseApiSelector in apiPages)) {
         console.log("404, " + req.url);
         res.statusCode = 404;
-        res.end();
+        res.end("{\"error\": \"Requested page was not found\"}");
     }
     else {
-        res.setHeader("content-type", "text/json");
         apiPages[baseApiSelector].controller(req, res, conn);
     }
 }
