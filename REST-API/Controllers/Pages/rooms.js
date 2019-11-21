@@ -12,7 +12,6 @@ exports.controller = (req, res, conn) => {
     }
 }
 
-
 var displayRooms = {
     run(req, res, conn, callbackServer) {
         conn.query("SELECT * FROM rooms", (err, data) => {
@@ -28,8 +27,6 @@ var displayRooms = {
         });
     }
 }
-
-
 
 var apiSubQueries = {
     ";GET": displayRooms,            /* "/rooms/" */
