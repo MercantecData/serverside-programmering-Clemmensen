@@ -29,6 +29,8 @@ BEGIN
 
 	IF startDay > 0 AND startMonth > 0 AND startYear > 0 THEN
 		SELECT * FROM room_bookings WHERE ((StartTime >= STR_TO_DATE(concat(startYear,startMonth,startDay),'%Y%m%d %h%i')) AND (EndTime <= STR_TO_DATE(concat(endYear,endMonth,endDay),'%Y%m%d %h%i')));
+	ELSEIF startYear > 0 THEN
+		SELECT * FROM room_bookings WHERE ((YEAR(StartTime) >= startYear) AND (YEAR(endTime) <= endYear));
 	ELSE
 		SELECT * FROM room_bookings WHERE (startDay = 0 OR (DAY(StartTime) >= startDay) AND (DAY(EndTime) <= endDay))
 			AND	(startMonth = 0 OR (MONTH(StartTime) >= startMonth) AND (MONTH(EndTime) <= endMonth));
@@ -36,6 +38,8 @@ BEGIN
 
 END //
 DELIMITER ;
+
+
 
 
 /* Dummy data */
@@ -56,9 +60,6 @@ INSERT INTO room_bookings (RoomId, StartTime, EndTime)
 
 
 /*
-
-2. Når man går ind på /bookings skal man modtage en oversigt over alle bookinger der er aktive idag. Man skal kunne ændre GET parametrene således at man kan få for en anden dag. (f.eks. hvis man går ind på "/bookings?day=14" så får man bookingen for d. 14. i måneden)
-
 3. Hvis man sender en POST request til /add kan man tilføje en ny booking til systemet. Hvis det ikke er en POST request skal der ikke ske noget.
 
 4. Lav et id-system for API'en. Den der vil tilgå den skal have en key, som skal sendes med som parameter når man tilgår API'en*/
