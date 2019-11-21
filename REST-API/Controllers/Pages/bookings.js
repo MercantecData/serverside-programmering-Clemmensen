@@ -1,37 +1,72 @@
 var url = require("url");
+var pageIdentifier = "/bookings";
 
-
-/* Call examples:
- * http://localhost:8080/bookings?day=20
- * http://localhost:8080/bookings?month=10
- * http://localhost:8080/bookings?year=2018 // fix this
- * http://localhost:8080/bookings?day=20&year=2018&month=11&endDay=21&endMonth=11&endYear=2019
- */
+// Select sub api controller endpoints
 exports.controller = (req, res, conn, callbackServer) => {
-    var parsedUrl = url.parse(req.url, true);
+    var subApiSelector = req.url.split("?")[0].split("/")[2] + ";" + req.method;
 
-    console.log(req.method);
-    console.log(JSON.stringify(parsedUrl));
+    if (!(subApiSelector in apiSubQueries)) {
+        callbackServer(req, res, false);
+    }
+    else {
+        res.setHeader("content-type", "text/json");
+        apiSubQueries[subApiSelector].run(req, res, conn, callbackServer);
+    }
+}
 
-    var startDay = parsedUrl.query["day"] ? parsedUrl.query["day"] : 0;
-    var startMonth = parsedUrl.query["month"] ? parsedUrl.query["month"] : 0;
-    var startYear = parsedUrl.query["year"] ? parsedUrl.query["year"] : 0;
+// Displays bookings based on query
+//Call examples:
+//http://localhost:8080/bookings?day=20
+//http://localhost:8080/bookings?month=10
+//http://localhost:8080/bookings?year=2018
+//http://localhost:8080/bookings?day=20&year=2018&month=11&endDay=21&endMonth=11&endYear=2019
+var displayBookings = {
+    run(req, res, conn, callbackServer) {
+        var parsedUrl = url.parse(req.url, true);
 
-    var endDay = parsedUrl.query["endDay"] ? parsedUrl.query["endDay"] : startDay;
-    var endMonth = parsedUrl.query["endMonth"] ? parsedUrl.query["endMonth"] : startMonth;
-    var endYear = parsedUrl.query["endYear"] ? parsedUrl.query["endYear"] : startYear;
+        console.log(parsedUrl);
 
-    console.log("Calling with " + startDay + "," + startMonth + "," + startYear + "," + endDay + "," + endMonth + "," + endYear);
+        var startDay = parsedUrl.query["day"] ? parsedUrl.query["day"] : 0;
+        var startMonth = parsedUrl.query["month"] ? parsedUrl.query["month"] : 0;
+        var startYear = parsedUrl.query["year"] ? parsedUrl.query["year"] : 0;
 
-    conn.query("CALL GetBookings(?, ?, ?, ?, ?, ?)", [startDay, startMonth, startYear, endDay, endMonth, endYear], (err, data) => {
-        if (err) {
-            res.statusCode = (err.code == "ER_SP_WRONG_NO_OF_ARGS" ? 400 : 500);
-            console.log(JSON.stringify(err));
-        }
-        else {
-            res.write(JSON.stringify(data));
+        var endDay = parsedUrl.query["endDay"] ? parsedUrl.query["endDay"] : startDay;
+        var endMonth = parsedUrl.query["endMonth"] ? parsedUrl.query["endMonth"] : startMonth;
+        var endYear = parsedUrl.query["endYear"] ? parsedUrl.query["endYear"] : startYear;
+
+        conn.query("CALL GetBookings(?, ?, ?, ?, ?, ?)", [startDay, startMonth, startYear, endDay, endMonth, endYear], (err, data) => {
+            if (err) {
+                res.statusCode = (err.code == "ER_SP_WRONG_NO_OF_ARGS" ? 400 : 500);
+                console.log(JSON.stringify(err));
+            }
+            else {
+                res.write(JSON.stringify(data));
+            }
+
+            callbackServer(req, res, true);
+        });
+    }
+};
+
+// Add a new booking to the system
+var addBooking = {
+    run(req, res, conn, callbackServer) {
+        var parsedUrl = url.parse(req.url, true);
+
+        var roomId = parsedUrl.query["roomId"];
+        var fromDate = parsedUrl.query["fromDate"];
+        var toDate = parsedUrl.query["toDate"];
+
+        if (roomId == undefined || fromDate == undefined || toDate == undefined) {
+            res.statusCode = 400;
         }
 
         callbackServer(req, res, true);
-    });
-}
+    }
+};
+
+var apiSubQueries = {
+    ";GET": displayBookings,            /* "/bookings/" */
+    "undefined;GET": displayBookings,   /* "/bookings" */
+    "add;POST": addBooking              /* "/bookings/add" */
+};

@@ -10,7 +10,7 @@ var pageSelector = require("./Controllers/Pages/pageController");
 
 // Runs server and calls controller to handle page query
 var serverInit = (conn) => {
-    http.createServer((req, res) => {        
+    http.createServer((req, res) => {
         pageSelector.handleQuery(req, res, conn, checkSuccess);
     }).listen(8080);
 }

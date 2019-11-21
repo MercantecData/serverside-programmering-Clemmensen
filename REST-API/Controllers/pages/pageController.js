@@ -1,4 +1,4 @@
-// Controllers for url end points
+    // Controllers for url end points
 var apiPages = {
     "/rooms": require("./rooms"),
     "/bookings": require("./bookings")
@@ -8,14 +8,14 @@ var apiPages = {
 // Look for controller for desired page
 exports.handleQuery = (req, res, conn, callbackServer) => {
 
-	// Check if page handler is defined
-    var baseUrl = req.url.split("?")[0];
+	// Check if main page handler is defined - using high url path selection
+    var baseApiSelector = "/" + req.url.split("?")[0].split("/")[1];
 
-    if (!(baseUrl in apiPages)) {
+    if (!(baseApiSelector in apiPages)) {
         callbackServer(req, res, false);
     }
     else {
         res.setHeader("content-type", "text/json");
-        apiPages[baseUrl].controller(req, res, conn, callbackServer);
+        apiPages[baseApiSelector].controller(req, res, conn, callbackServer);
     }
 }
