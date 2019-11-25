@@ -10,11 +10,7 @@ var dbConnectionString = {
 exports.connect = (callback) => {
     var conn = mysql.createConnection(dbConnectionString);
     conn.connect((err) => {
-        if (err) {
-            console.error("An error occured while connecting to database:");
-            console.error(JSON.stringify(err));
-        } else {
-            callback(conn);
-        }
+        if (err) console.error("An error occured while connecting to database: " + JSON.stringify(err));
+        else callback(conn);
     });
 }

@@ -1,18 +1,9 @@
 var url = require("url");
+var handleError = require("../Errors/errorController.js").handleError;
+var runSubPage = require("./_subPageController").runSubPage;
 
 // Select sub api controller endpoints
-exports.controller = (req, res, conn) => {
-    var subApiSelector = req.url.split("?")[0].split("/")[2] + ";" + req.method;
-
-    if (!(subApiSelector in apiSubQueries)) {
-        console.log("404, " + req.url);
-        res.statusCode = 404;
-        res.end("{\"error\": \"Requested page was not found\"}");
-    }
-    else {
-        apiSubQueries[subApiSelector].run(req, res, conn);
-    }
-}
+exports.controller = (req, res, conn) => runSubPage(req, res, conn, apiSubQueries);
 
 // Converts a time from server to the localtime to reflect UTC times at server correctly.
 var utcTimeConvert = function (roomBookings) {
@@ -43,14 +34,8 @@ var displayBookings = {
         conn.query("CALL GetBookings(?, ?, ?, ?, ?, ?)", [startDay, startMonth, startYear, endDay, endMonth, endYear], (err, data) => {
 
             if (err) {
-                res.statusCode = (err.code == "ER_SP_WRONG_NO_OF_ARGS" ? 400 : 500);
-                if (res.statusCode == 400) {
-                    res.end("{\"error\": \"Invalid combination of query parameters\"}");
-                }
-                else {
-                    res.end("{\"error\": \"An error occured in the in the database query\"}");
-                }
-                console.log(JSON.stringify(err));
+                if (err.code == "ER_SP_WRONG_NO_OF_ARGS") handleError(req, res, 2);
+                else handleError(req, res, 1);
             }
 
             else {
@@ -80,16 +65,13 @@ var addBooking = {
 
         // TODO: Move to method checking input
         if (roomId == undefined || fromDateTime == "Invalid Date" || toDateTime == "Invalid Date") {
-            res.statusCode = 400;
-            res.end("{\"error\": \"Required parameters are missing\"}");
+            handleError(req, res, 2);
         }
         else if (currentDateTime > fromDateTime || currentDateTime > toDateTime) {
-            res.statusCode = 400;
-            res.end("{\"error\": \"Booking date must be after " + currentDateTime + "\"}");
+            handleError(req, res, 2, "Booking date must be after '" + currentDateTime + "'");
         }
         else if (fromDateTime > toDateTime) {
-            res.statusCode = 400;
-            res.end("{\"error\": \"End time of booking must be after start time of booking\"}");
+            handleError(req, res, 2, "End time of booking must be after start time of booking");
         }
         else {
 
@@ -110,29 +92,12 @@ var addBooking = {
             });
 
             
-            if (promiseResult == undefined) {
-                // TODO: Print data relating to error of not inserting
-                res.statusCode = 500;
-                res.end("{\"error\": \"An error occured while attempting to fetch the date.\"}");
-                return;
-            }
-
+            if (promiseResult == undefined) handleError(req, res, 1);
             else {
-
 
                 // Do not alllow booking if a reservation conflicts
                 if (promiseResult.length > 0) {
-                    console.log("A user attempted to book room: " + roomId + " from: "
-                        + fromDateTime + " to: " + toDateTime + " following bookings conflicted with this: ");
-
-                    console.log(promiseResult);
-
-                    // TODO: Nice to have - An identifier for the user having the booking should be added later
-                    // - UserExperience in regards to user clicking post twice and getting acknowledgement
-                    // that they got the room, that they already have the room or someone else has the room
-                    // ... but for now, just output error and the conflicting bookings
-                    res.statusCode = 400;
-                    res.end("{\"error\": \"Room is already booked, please change time to book\", " +
+                    handleError(req, res, 2, "{\"error\": \"Room is already booked, please change time to book\", " +
                         "\"conflicts\": " + JSON.stringify(promiseResult) + "} ");
                     return;
                 }
@@ -140,14 +105,8 @@ var addBooking = {
                 conn.query("INSERT INTO room_bookings (RoomId, StartTime, EndTime) VALUES (?, ?, ?)", [roomId, fromDateTime, toDateTime], (err, result) => {
 
                     if (err) {
-                        res.statusCode = (err.code == "ER_SP_WRONG_NO_OF_ARGS" ? 400 : 500);
-                        if (res.statusCode == 400) {
-                            res.end("{\"error\": \"Invalid combination of query parameters\"}");
-                        }
-                        else {
-                            res.end("{\"error\": \"An error occured in the in the database query\"}");
-                        }
-                        console.log(JSON.stringify(err));
+                        if (err.code == "ER_SP_WRONG_NO_OF_ARGS") handleError(req, res, 2);
+                        else handleError(req, res, 1);
                     }
 
                     res.end(JSON.stringify(result));
