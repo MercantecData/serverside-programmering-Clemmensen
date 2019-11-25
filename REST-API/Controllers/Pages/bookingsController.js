@@ -14,6 +14,14 @@ exports.controller = (req, res, conn) => {
     }
 }
 
+// Converts a time from server to the localtime to reflect UTC times at server correctly.
+var utcTimeConvert = function (roomBookings) {
+    roomBookings.forEach((booking) => {
+        booking.StartTime = new Date(booking.StartTime).toLocaleString();
+        booking.EndTime = new Date(booking.EndTime).toLocaleString();
+    });
+}
+
 // Displays bookings based on query
 //Call examples:
 //http://localhost:8080/bookings?day=20
@@ -46,13 +54,7 @@ var displayBookings = {
             }
 
             else {
-
-                // Convert from UTC to local timezone
-                data[0].forEach((elm) => {
-                    elm.StartTime = new Date(elm.StartTime).toLocaleString();
-                    elm.EndTime = new Date(elm.EndTime).toLocaleString();
-                });
-
+                utcTimeConvert(data[0]);
                 res.end(JSON.stringify(data));
             }
         });
@@ -97,12 +99,7 @@ var addBooking = {
                     + " AND(StartTime <= ? AND EndTime > ?) OR (StartTime >= ? AND EndTime <= ?)",
                     [roomId, fromDateTime, fromDateTime, fromDateTime, toDateTime], (err, data) => {
                         if (!err) {
-                            // Convert from UTC to local timezone
-                            data.forEach((elm) => {
-                                elm.StartTime = new Date(elm.StartTime).toLocaleString();
-                                elm.EndTime = new Date(elm.EndTime).toLocaleString();
-                            });
-
+                            utcTimeConvert(data);
                             resolve(data);
                         }
                         else

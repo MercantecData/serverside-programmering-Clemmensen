@@ -4,8 +4,8 @@ var mysql = require("mysql");
 
 
 // Custom modules
-var dbConnection = require("./Controllers/Database/dbConnection");
-var pageSelector = require("./Controllers/Pages/pageController");
+var dbConnection = require("./Controllers/Database/dbController");
+var pageSelector = require("./Controllers/Pages/_pageController");
 
 
 // Runs server and calls controller to handle page query
