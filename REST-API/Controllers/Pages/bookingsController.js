@@ -67,7 +67,7 @@ var addBooking = {
             // TODO: Move to method checking whether database has entry conflicting
             var promiseResult = await new Promise((resolve, reject) => {
                 conn.query("SELECT * FROM room_bookings WHERE RoomId = ?"
-                    + " AND(StartTime <= ? AND EndTime > ?) OR (StartTime >= ? AND EndTime <= ?)",
+                    + " AND ((StartTime <= ? AND EndTime > ?) OR (StartTime >= ? AND EndTime <= ?))",
                     [roomId, fromDateTime, fromDateTime, fromDateTime, toDateTime], (err, data) => {
                         if (!err) {
                             helper.utcTimeConvert(data);
