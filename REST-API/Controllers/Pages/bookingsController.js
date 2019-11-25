@@ -1,37 +1,26 @@
+// TODO: Delete this later
 var url = require("url");
-var handleError = require("../Errors/errorController.js").handleError;
+
+
+var handleError = require("../Errors/errorController").handleError;
 var runSubPage = require("./_subPageController").runSubPage;
+var helper = require("../../Helpers/TimeAndUrlHelper");
 
 // Select sub api controller endpoints
 exports.controller = (req, res, conn) => runSubPage(req, res, conn, apiSubQueries);
 
-// Converts a time from server to the localtime to reflect UTC times at server correctly.
-var utcTimeConvert = function (roomBookings) {
-    roomBookings.forEach((booking) => {
-        booking.StartTime = new Date(booking.StartTime).toLocaleString();
-        booking.EndTime = new Date(booking.EndTime).toLocaleString();
-    });
-}
-
 // Displays bookings based on query
-//Call examples:
-//http://localhost:8080/bookings?day=20
-//http://localhost:8080/bookings?month=10
-//http://localhost:8080/bookings?year=2018
-//http://localhost:8080/bookings?day=20&year=2018&month=11&endDay=21&endMonth=11&endYear=2019
 var displayBookings = {
     async run(req, res, conn) {
-        var parsedUrl = url.parse(req.url, true);
 
-        var startDay = parsedUrl.query["day"] ? parsedUrl.query["day"] : 0;
-        var startMonth = parsedUrl.query["month"] ? parsedUrl.query["month"] : 0;
-        var startYear = parsedUrl.query["year"] ? parsedUrl.query["year"] : 0;
+        var params = helper.fetchUrlValues (req, {
+            "day": 0, "month": 0, "year": 0,
+            "endDay": "day", "endMonth": "month", "endYear": "year"
+        });
 
-        var endDay = parsedUrl.query["endDay"] ? parsedUrl.query["endDay"] : startDay;
-        var endMonth = parsedUrl.query["endMonth"] ? parsedUrl.query["endMonth"] : startMonth;
-        var endYear = parsedUrl.query["endYear"] ? parsedUrl.query["endYear"] : startYear;
-
-        conn.query("CALL GetBookings(?, ?, ?, ?, ?, ?)", [startDay, startMonth, startYear, endDay, endMonth, endYear], (err, data) => {
+        conn.query("CALL GetBookings(?, ?, ?, ?, ?, ?)",
+            [params.day, params.month, params.year,
+                params.endDay, params.endMonth, params.endYear], (err, data) => {
 
             if (err) {
                 if (err.code == "ER_SP_WRONG_NO_OF_ARGS") handleError(req, res, 2);
@@ -39,7 +28,7 @@ var displayBookings = {
             }
 
             else {
-                utcTimeConvert(data[0]);
+                helper.utcTimeConvert(data[0]);
                 res.end(JSON.stringify(data));
             }
         });
@@ -55,7 +44,7 @@ var displayBookings = {
 var addBooking = {
     async run(req, res, conn) {
         var parsedUrl = url.parse(req.url, true);
-
+        
         var roomId = parsedUrl.query["roomId"];
         var fromDateTime = new Date(parsedUrl.query["fromDateTime"]).toLocaleString();
         var toDateTime = new Date(parsedUrl.query["toDateTime"]).toLocaleString();
@@ -81,7 +70,7 @@ var addBooking = {
                     + " AND(StartTime <= ? AND EndTime > ?) OR (StartTime >= ? AND EndTime <= ?)",
                     [roomId, fromDateTime, fromDateTime, fromDateTime, toDateTime], (err, data) => {
                         if (!err) {
-                            utcTimeConvert(data);
+                            helper.utcTimeConvert(data);
                             resolve(data);
                         }
                         else
@@ -95,7 +84,7 @@ var addBooking = {
             if (promiseResult == undefined) handleError(req, res, 1);
             else {
 
-                // Do not alllow booking if a reservation conflicts
+                // Do not allow booking if a reservation conflicts
                 if (promiseResult.length > 0) {
                     handleError(req, res, 2, "{\"error\": \"Room is already booked, please change time to book\", " +
                         "\"conflicts\": " + JSON.stringify(promiseResult) + "} ");
