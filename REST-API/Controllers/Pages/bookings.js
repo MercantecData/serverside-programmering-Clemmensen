@@ -48,7 +48,6 @@ var displayBookings = {
             else {
 
                 // Convert from UTC to local timezone
-                // This should later be based on a users timezone preference
                 data[0].forEach((elm) => {
                     elm.StartTime = new Date(elm.StartTime).toLocaleString();
                     elm.EndTime = new Date(elm.EndTime).toLocaleString();
@@ -71,8 +70,8 @@ var addBooking = {
         var parsedUrl = url.parse(req.url, true);
 
         var roomId = parsedUrl.query["roomId"];
-        var fromDateTime = new Date(parsedUrl.query["fromDateTime"]);
-        var toDateTime = new Date(parsedUrl.query["toDateTime"]);
+        var fromDateTime = new Date(parsedUrl.query["fromDateTime"]).toLocaleString();
+        var toDateTime = new Date(parsedUrl.query["toDateTime"]).toLocaleString();
 
         var currentDateTime = new Date();
 
@@ -94,30 +93,53 @@ var addBooking = {
 
             // TODO: Move to method checking whether database has entry conflicting
             var promiseResult = await new Promise((resolve, reject) => {
-                conn.query("SELECT * FROM room_bookingsa WHERE RoomId = 1"
-                    + " AND(StartTime <= '2018-11-22 11:00' AND EndTime >= '2020-11-22 9:00')"
-                    + " OR (StartTime >= '2018-11-22 9:00' AND EndTime <= '2020-11-22 11:00')", (err, data) => {
-                        if (!err)
+                conn.query("SELECT * FROM room_bookings WHERE RoomId = ?"
+                    + " AND(StartTime <= ? AND EndTime > ?) OR (StartTime >= ? AND EndTime <= ?)",
+                    [roomId, fromDateTime, fromDateTime, fromDateTime, toDateTime], (err, data) => {
+                        if (!err) {
+                            // Convert from UTC to local timezone
+                            data.forEach((elm) => {
+                                elm.StartTime = new Date(elm.StartTime).toLocaleString();
+                                elm.EndTime = new Date(elm.EndTime).toLocaleString();
+                            });
+
                             resolve(data);
+                        }
                         else
                             reject(err);
                     });
             }).catch(err => {
                 console.log(JSON.stringify(err));
             });
+
             
             if (promiseResult == undefined) {
                 // TODO: Print data relating to error of not inserting
-                res.statusCode = 400;
-                res.write("{\"error\": \"An error occured while attempting to book the date - please consult booked state of room.\"}");
-                res.end();
+                res.statusCode = 500;
+                res.end("{\"error\": \"An error occured while attempting to fetch the date.\"}");
+                return;
             }
 
             else {
-                // TODO: Move to method inserting data
 
 
-                console.log("-" + fromDateTime + " - " + toDateTime);
+                // Do not alllow booking if a reservation conflicts
+                if (promiseResult.length > 0) {
+                    console.log("A user attempted to book room: " + roomId + " from: "
+                        + fromDateTime + " to: " + toDateTime + " following bookings conflicted with this: ");
+
+                    console.log(promiseResult);
+
+                    // TODO: Nice to have - An identifier for the user having the booking should be added later
+                    // - UserExperience in regards to user clicking post twice and getting acknowledgement
+                    // that they got the room, that they already have the room or someone else has the room
+                    // ... but for now, just output error and the conflicting bookings
+                    res.statusCode = 400;
+                    res.end("{\"error\": \"Room is already booked, please change time to book\", " +
+                        "\"conflicts\": " + JSON.stringify(promiseResult) + "} ");
+                    return;
+                }
+
                 conn.query("INSERT INTO room_bookings (RoomId, StartTime, EndTime) VALUES (?, ?, ?)", [roomId, fromDateTime, toDateTime], (err, result) => {
 
                     if (err) {
@@ -132,12 +154,10 @@ var addBooking = {
                     }
 
                     res.end(JSON.stringify(result));
-
                 });
 
-            }*/
+            }
         }
-
     }
 };
 
