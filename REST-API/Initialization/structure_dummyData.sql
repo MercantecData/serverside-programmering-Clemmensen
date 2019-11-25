@@ -40,6 +40,11 @@ END //
 DELIMITER ;
 
 
+/*SELECT * FROM room_bookings WHERE RoomId = 1
+	AND (StartTime <= '2019-11-22 11:00' AND EndTime >= '2019-11-22 9:00')*/
+
+
+
 /* Dummy data */
 INSERT INTO rooms (RoomName, FloorLocation)
 	VALUES ('Windows', 0), ('Beatles', 0), ('Linus Torvalds [A1.41]', 1), ('A1.40', 1), ('A1.39 (Glas)', 1), ('A1.38 (firkantet)', 1);

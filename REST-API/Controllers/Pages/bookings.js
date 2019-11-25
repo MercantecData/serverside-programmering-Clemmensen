@@ -21,10 +21,8 @@ exports.controller = (req, res, conn) => {
 //http://localhost:8080/bookings?year=2018
 //http://localhost:8080/bookings?day=20&year=2018&month=11&endDay=21&endMonth=11&endYear=2019
 var displayBookings = {
-    run(req, res, conn) {
+    async run(req, res, conn) {
         var parsedUrl = url.parse(req.url, true);
-
-        console.log(parsedUrl);
 
         var startDay = parsedUrl.query["day"] ? parsedUrl.query["day"] : 0;
         var startMonth = parsedUrl.query["month"] ? parsedUrl.query["month"] : 0;
@@ -48,6 +46,14 @@ var displayBookings = {
             }
 
             else {
+
+                // Convert from UTC to local timezone
+                // This should later be based on a users timezone preference
+                data[0].forEach((elm) => {
+                    elm.StartTime = new Date(elm.StartTime).toLocaleString();
+                    elm.EndTime = new Date(elm.EndTime).toLocaleString();
+                });
+
                 res.end(JSON.stringify(data));
             }
         });
@@ -61,7 +67,7 @@ var displayBookings = {
 // url: http://localhost:8080/bookings/add
 // body: {"roomId":5,"fromDateTime":"2019-11-22 9:00","toDateTime":"2019-11-22 10:00"}
 var addBooking = {
-    run(req, res, conn) {
+    async run(req, res, conn) {
         var parsedUrl = url.parse(req.url, true);
 
         var roomId = parsedUrl.query["roomId"];
@@ -70,6 +76,8 @@ var addBooking = {
 
         var currentDateTime = new Date();
 
+
+        // TODO: Move to method checking input
         if (roomId == undefined || fromDateTime == "Invalid Date" || toDateTime == "Invalid Date") {
             res.statusCode = 400;
             res.end("{\"error\": \"Required parameters are missing\"}");
@@ -84,26 +92,50 @@ var addBooking = {
         }
         else {
 
-            // TODO ADD check before adding BOOKING whether reserved room
-            // - optionally in stored procedure
-
-            conn.query("INSERT INTO room_bookings (RoomId, StartTime, EndTime) VALUES (?, ?, ?)", [roomId, fromDateTime, toDateTime], (err, result) => {
-
-                if (err) {
-                    res.statusCode = (err.code == "ER_SP_WRONG_NO_OF_ARGS" ? 400 : 500);
-                    if (res.statusCode == 400) {
-                        res.end("{\"error\": \"Invalid combination of query parameters\"}");
-                    }
-                    else {
-                        res.end("{\"error\": \"An error occured in the in the database query\"}");
-                    }
-                    console.log(JSON.stringify(err));
-                }
-
-                res.end(JSON.stringify(result));
-
+            // TODO: Move to method checking whether database has entry conflicting
+            var promiseResult = await new Promise((resolve, reject) => {
+                conn.query("SELECT * FROM room_bookingsa WHERE RoomId = 1"
+                    + " AND(StartTime <= '2018-11-22 11:00' AND EndTime >= '2020-11-22 9:00')"
+                    + " OR (StartTime >= '2018-11-22 9:00' AND EndTime <= '2020-11-22 11:00')", (err, data) => {
+                        if (!err)
+                            resolve(data);
+                        else
+                            reject(err);
+                    });
+            }).catch(err => {
+                console.log(JSON.stringify(err));
             });
+            
+            if (promiseResult == undefined) {
+                // TODO: Print data relating to error of not inserting
+                res.statusCode = 400;
+                res.write("{\"error\": \"An error occured while attempting to book the date - please consult booked state of room.\"}");
+                res.end();
+            }
 
+            else {
+                // TODO: Move to method inserting data
+
+
+                console.log("-" + fromDateTime + " - " + toDateTime);
+                conn.query("INSERT INTO room_bookings (RoomId, StartTime, EndTime) VALUES (?, ?, ?)", [roomId, fromDateTime, toDateTime], (err, result) => {
+
+                    if (err) {
+                        res.statusCode = (err.code == "ER_SP_WRONG_NO_OF_ARGS" ? 400 : 500);
+                        if (res.statusCode == 400) {
+                            res.end("{\"error\": \"Invalid combination of query parameters\"}");
+                        }
+                        else {
+                            res.end("{\"error\": \"An error occured in the in the database query\"}");
+                        }
+                        console.log(JSON.stringify(err));
+                    }
+
+                    res.end(JSON.stringify(result));
+
+                });
+
+            }*/
         }
 
     }
