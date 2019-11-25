@@ -9,13 +9,12 @@ var pageSelector = require("./Controllers/Pages/_pageController");
 
 
 // Runs server and calls controller to handle page query
-var serverInit = (conn) => {
+var main = async () => {
+    var conn = await dbConnection.connect();
     http.createServer((req, res) => {
         res.setHeader("content-type", "text/json");
         pageSelector.handleQuery(req, res, conn);
     }).listen(8080);
 }
 
-
-// Initialize db connection and call server start
-dbConnection.connect(serverInit);
+main();
