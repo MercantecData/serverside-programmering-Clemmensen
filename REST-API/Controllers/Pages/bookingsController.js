@@ -64,30 +64,14 @@ var addBooking = {
         }
         else {
 
-            // TODO: Move to method checking whether database has entry conflicting
-            var promiseResult = await new Promise((resolve, reject) => {
-                conn.query("SELECT * FROM room_bookings WHERE RoomId = ?"
-                    + " AND ((StartTime <= ? AND EndTime > ?) OR (StartTime >= ? AND EndTime <= ?))",
-                    [roomId, fromDateTime, fromDateTime, fromDateTime, toDateTime], (err, data) => {
-                        if (!err) {
-                            helper.utcTimeConvert(data);
-                            resolve(data);
-                        }
-                        else
-                            reject(err);
-                    });
-            }).catch(err => {
-                console.log(JSON.stringify(err));
-            });
-
-            
-            if (promiseResult == undefined) handleError(req, res, 1);
+            var roomBookings = await getRoomBookings(conn, roomId, fromDateTime, toDateTime);
+                        
+            if (roomBookings == undefined) handleError(req, res, 1);
             else {
 
                 // Do not allow booking if a reservation conflicts
-                if (promiseResult.length > 0) {
-                    handleError(req, res, 2, "{\"error\": \"Room is already booked, please change time to book\", " +
-                        "\"conflicts\": " + JSON.stringify(promiseResult) + "} ");
+                if (roomBookings.length > 0) {
+                    handleError(req, res, 2, "{\"error\": \"Room is already booked, please change time to book\", \"conflicts\": " + JSON.stringify(roomBookings) + "} ");
                     return;
                 }
 
@@ -100,11 +84,29 @@ var addBooking = {
 
                     res.end(JSON.stringify(result));
                 });
-
             }
         }
     }
 };
+
+
+var getRoomBookings = async (conn, roomId, fromDateTime, toDateTime) => {
+    return await new Promise((resolve, reject) => {
+        conn.query("SELECT * FROM room_bookings WHERE RoomId = ?"
+            + " AND ((StartTime <= ? AND EndTime > ?) OR (StartTime >= ? AND EndTime <= ?))",
+            [roomId, fromDateTime, fromDateTime, fromDateTime, toDateTime], (err, data) => {
+                if (!err) {
+                    helper.utcTimeConvert(data);
+                    resolve(data);
+                }
+                else
+                    reject(err);
+            });
+    }).catch(err => {
+        console.log(JSON.stringify(err));
+    });
+}
+
 
 var apiSubQueries = {
     ";GET": displayBookings,            /* "/bookings/" */
