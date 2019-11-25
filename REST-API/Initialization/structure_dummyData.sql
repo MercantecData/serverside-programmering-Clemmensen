@@ -26,26 +26,17 @@ DROP PROCEDURE IF EXISTS GetBookings;
 DELIMITER //
 CREATE PROCEDURE GetBookings(IN startDay INT, startMonth INT, startYear INT, endDay INT, endMonth INT, endYear INT)
 BEGIN
-
-	IF startDay > 0 AND startMonth > 0 AND startYear > 0 THEN
 		SELECT room_bookings.*, rooms.RoomName, rooms.FloorLocation FROM room_bookings
-			INNER JOIN rooms on room_bookings.RoomId = rooms.Id
-			WHERE ((StartTime >= STR_TO_DATE(concat(startYear,startMonth,startDay),'%Y%m%d %h%i'))
-				AND (EndTime <= STR_TO_DATE(concat(endYear,endMonth,endDay),'%Y%m%d %h%i'))) ORDER BY StartTime, room_bookings.RoomId;
-	ELSEIF startYear > 0 THEN
-		SELECT room_bookings.*, rooms.RoomName, rooms.FloorLocation FROM room_bookings
-			INNER JOIN rooms on room_bookings.RoomId = rooms.Id
-			WHERE ((YEAR(StartTime) >= startYear)
-				AND (YEAR(endTime) <= endYear)) ORDER BY StartTime, room_bookings.RoomId;
-	ELSE
-		SELECT room_bookings.*, rooms.RoomName, rooms.FloorLocation FROM room_bookings
-			INNER JOIN rooms on room_bookings.RoomId = rooms.Id
-			WHERE (startDay = 0 OR (DAY(StartTime) >= startDay)	AND (DAY(EndTime) <= endDay))
-				AND	(startMonth = 0 OR (MONTH(StartTime) >= startMonth) AND (MONTH(EndTime) <= endMonth)) ORDER BY StartTime, room_bookings.RoomId;
-	END IF;		
-
+		INNER JOIN rooms on room_bookings.RoomId = rooms.Id
+		WHERE (startDay = 0 OR DAY(StartTime) = startDay
+			OR ((DAY(StartTime) >= startDay) AND (DAY(EndTime) <= endDay) AND startDay != endDay))
+		AND (startMonth = 0 OR MONTH(StartTime) = startMonth
+			OR ((MONTH(StartTime) >= startMonth) AND (MONTH(EndTime) <= endMonth) AND startMonth != endMonth))
+		AND (startYear = 0 OR YEAR(StartTime) = @startYear
+			OR ((YEAR(StartTime) >= startYear) AND (YEAR(EndTime) <= endYear) AND startYear != endYear));
 END //
 DELIMITER ;
+
 
 
 /* Dummy data */

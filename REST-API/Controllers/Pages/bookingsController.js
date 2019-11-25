@@ -18,6 +18,77 @@ var displayBookings = {
             "endDay": "day", "endMonth": "month", "endYear": "year"
         });
 
+
+        //CALL GetBookingsByDay(20, 0, 0, 20, 0, 0) ... if month = 0 and year = 0
+        //CALL GetBookingsByDayInterval(
+        //CALL GetBookingsByMonth(
+        //CALL GetBookingsByMonthInterval(
+        //CALL GetBookingsByDayAndMonth(
+        //CALL GetBookingsByDayAndMonthInterval(
+
+        // CALL GetBookings(...
+
+        /*
+         *
+         * 
+SET @startDay = 20;
+SET @startMonth = 11;
+SET @startYear = 2019;
+
+SET @endDay = 20;
+SET @endMonth = 11;
+SET @endYear = 2019;
+
+SELECT room_bookings.*, rooms.RoomName, rooms.FloorLocation FROM room_bookings
+			INNER JOIN rooms on room_bookings.RoomId = rooms.Id
+			WHERE (@startDay = 0 OR (DAY(StartTime) >= @startDay)	AND (DAY(EndTime) <= @endDay))
+				AND	(@startMonth = 0 OR (MONTH(StartTime) >= @startMonth) AND (MONTH(EndTime) <= @endMonth)) ORDER BY StartTime, room_bookings.RoomId;
+
+*/
+
+
+        // If day is known only (endDay and startDay is the same) - fromDateTime = day must be exact
+        // If month is known only (endMonth and startMonth is the same) - fromDateTime = month must be exact
+        // If year is known only ()
+
+
+
+
+
+
+
+
+
+
+        /*
+         
+
+
+SET @startDay = 20;
+SET @startMonth = 0;
+SET @startYear = 2019;
+
+SET @endDay = 20;
+SET @endMonth = 0;
+SET @endYear = 2019;
+
+SELECT room_bookings.*, rooms.RoomName, rooms.FloorLocation FROM room_bookings
+INNER JOIN rooms on room_bookings.RoomId = rooms.Id
+WHERE (@startDay = 0 OR DAY(StartTime) = @startDay
+    OR ((DAY(StartTime) >= @startDay) AND (DAY(EndTime) <= @endDay) AND @startDay != @endDay))
+AND (@startMonth = 0 OR MONTH(StartTime) = @startMonth
+    OR ((MONTH(StartTime) >= @startMonth) AND (MONTH(EndTime) <= @endMonth) AND @startMonth != @endMonth))
+AND (@startYear = 0 OR YEAR(StartTime) = @startYear
+    OR ((YEAR(StartTime) >= @startYear) AND (YEAR(EndTime) <= @endYear) AND @startYear != @endYear))
+
+
+AND	(@startMonth = 0 OR (MONTH(StartTime) >= @startMonth) AND (MONTH(EndTime) <= @endMonth)) ORDER BY StartTime, room_bookings.RoomId;
+
+
+
+*/
+
+
         conn.query("CALL GetBookings(?, ?, ?, ?, ?, ?)",
             [params.day, params.month, params.year,
                 params.endDay, params.endMonth, params.endYear], (err, data) => {
