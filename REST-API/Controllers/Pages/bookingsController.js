@@ -115,7 +115,7 @@ var isBookQueryOk = async (req, res, postData) => {
 var getRoomBookings = async (conn, postData) => {
     return await new Promise((resolve, reject) => {
         conn.query("SELECT * FROM room_bookings WHERE RoomId = ?"
-            + " AND ((StartTime <= ? AND EndTime > ?) OR (StartTime >= ? AND EndTime <= ?))",
+            + " AND ((StartTime <= ? AND EndTime > ?) OR (StartTime >= ? AND StartTime <= ?))",
             [postData.roomId, postData.fromDateTime, postData.fromDateTime, postData.fromDateTime, postData.toDateTime],
             (err, data) => {
                 if (!err) {
