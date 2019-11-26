@@ -4,9 +4,11 @@
     "\\REST-API",
     "\\REST-API\\Controllers",
     "\\REST-API\\Controllers\\Database",
+    "\\REST-API\\Controllers\\Errors",
     "\\REST-API\\Controllers\\Pages",
+    "\\REST-API\\Helpers",
     "\\REST-API\\Initialization"
   ],
-  "SelectedNode": "\\REST-API\\Controllers\\Pages\\bookings.js",
+  "SelectedNode": "\\REST-API\\Controllers\\Pages\\bookingsController.js",
   "PreviewInSolutionExplorer": false
 }

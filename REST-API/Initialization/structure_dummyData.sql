@@ -26,17 +26,27 @@ DROP PROCEDURE IF EXISTS GetBookings;
 DELIMITER //
 CREATE PROCEDURE GetBookings(IN startDay INT, startMonth INT, startYear INT, endDay INT, endMonth INT, endYear INT)
 BEGIN
+
+	IF startDay > 0 AND startMonth > 0 AND startYear > 0 THEN
+		SELECT room_bookings.*, rooms.RoomName, rooms.FloorLocation FROM room_bookings
+			INNER JOIN rooms on room_bookings.RoomId = rooms.Id
+			WHERE ((StartTime >= STR_TO_DATE(concat(startYear,startMonth,startDay),'%Y%m%d %h%i'))
+				AND (EndTime <= STR_TO_DATE(concat(endYear,endMonth,endDay),'%Y%m%d %h%i'))) ORDER BY StartTime, room_bookings.RoomId;
+	ELSE
 		SELECT room_bookings.*, rooms.RoomName, rooms.FloorLocation FROM room_bookings
 		INNER JOIN rooms on room_bookings.RoomId = rooms.Id
-		WHERE (startDay = 0 OR DAY(StartTime) = startDay
-			OR ((DAY(StartTime) >= startDay) AND (DAY(EndTime) <= endDay) AND startDay != endDay))
-		AND (startMonth = 0 OR MONTH(StartTime) = startMonth
-			OR ((MONTH(StartTime) >= startMonth) AND (MONTH(EndTime) <= endMonth) AND startMonth != endMonth))
-		AND (startYear = 0 OR YEAR(StartTime) = @startYear
-			OR ((YEAR(StartTime) >= startYear) AND (YEAR(EndTime) <= endYear) AND startYear != endYear));
+		WHERE (
+			(startDay = 0 OR DAY(StartTime) = startDay
+				OR ((DAY(StartTime) >= startDay) AND (DAY(EndTime) <= endDay) AND startDay != endDay))
+			AND (startMonth = 0 OR MONTH(StartTime) = startMonth
+				OR ((MONTH(StartTime) >= startMonth) AND (MONTH(EndTime) <= endMonth) AND startMonth != endMonth))
+			AND (startYear = 0 OR YEAR(StartTime) = startYear
+				OR ((YEAR(StartTime) >= startYear) AND (YEAR(EndTime) <= endYear) AND startYear != endYear))
+		) ORDER BY StartTime, room_bookings.RoomId;
+	END IF;		
+
 END //
 DELIMITER ;
-
 
 
 /* Dummy data */
@@ -52,7 +62,8 @@ INSERT INTO room_bookings (RoomId, StartTime, EndTime)
 			(1, '2019-11-22-13:00', '2019-11-22-15:00'),
 			(1, '2019-11-21-8:00', '2019-11-21-10:00'),
 			(2, '2019-11-23-11:00', '2019-11-23-13:00'),
-			(2, '2019-11-23-7:00', '2019-11-23-8:00');
+			(2, '2019-11-23-7:00', '2019-11-23-8:00'),
+			(2, '2018-1-3-7:00', '2019-10-5-8:00'); /* Note <- Good for checking GetBookings on */
 
 
 
