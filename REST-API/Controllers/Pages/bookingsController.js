@@ -19,18 +19,18 @@ var displayBookings = {
 
         conn.query("CALL GetBookings(?, ?, ?, ?, ?, ?)",
             [params.day, params.month, params.year,
-                params.endDay, params.endMonth, params.endYear], (err, data) => {
+            params.endDay, params.endMonth, params.endYear], (err, data) => {
 
-            if (err) {
-                if (err.code == "ER_SP_WRONG_NO_OF_ARGS") handleError(req, res, 2);
-                else handleError(req, res, 1);
-            }
+                if (err) {
+                    if (err.code == "ER_SP_WRONG_NO_OF_ARGS") handleError(req, res, 2);
+                    else handleError(req, res, 1);
+                }
 
-            else {
-                helper.utcTimeConvert(data[0]);
-                res.end(JSON.stringify(data));
-            }
-        });
+                else {
+                    helper.utcTimeConvert(data[0]);
+                    res.end(JSON.stringify(data));
+                }
+            });
     }
 };
 
@@ -43,28 +43,30 @@ var displayBookings = {
 var addBooking = {
     async run(req, res, conn) {
         var parsedUrl = url.parse(req.url, true);
-        
-        var roomId = parsedUrl.query["roomId"];
-        var fromDateTime = new Date(parsedUrl.query["fromDateTime"]).toLocaleString();
-        var toDateTime = new Date(parsedUrl.query["toDateTime"]).toLocaleString();
+
+            var roomId = parsedUrl.query["roomId"];
+            var fromDateTime = new Date(parsedUrl.query["fromDateTime"]).toLocaleString();
+            var toDateTime = new Date(parsedUrl.query["toDateTime"]).toLocaleString();
 
         if (await isBookQueryOk(req, res, roomId, fromDateTime, toDateTime)) {
 
-            var roomBookings = await getRoomBookings(conn, roomId, fromDateTime, toDateTime);         
-            
+            var roomBookings = await getRoomBookings(conn, roomId, fromDateTime, toDateTime);
+
             if (roomBookings == undefined) handleError(req, res, 1);
             else {
 
                 // Do not allow booking if a reservation conflicts
                 if (roomBookings.length > 0) {
-                    handleError(req, res, 2, "{\"error\": \"Room is already booked, please change time to book\", \"conflicts\": " + JSON.stringify(roomBookings) + "} ");
+                    handleError(req, res, 2, {"error": "Room is already booked, please change time to book", "conflicts": roomBookings});
                     return;
                 }
 
                 conn.query("INSERT INTO room_bookings (RoomId, StartTime, EndTime) VALUES (?, ?, ?)", [roomId, fromDateTime, toDateTime], (err, result) => {
 
                     if (err) {
-                        if (err.code == "ER_SP_WRONG_NO_OF_ARGS") handleError(req, res, 2);
+                        console.log(JSON.stringify(err));
+                        if (err.code == "ER_SP_WRONG_NO_OF_ARGS") handleError(req, res, 2, "Please check that room, from and to date is all defined");
+                        else if(err.code == "ER_NO_REFERENCED_ROW_2") handleError(req, res, 2, "Please verify that the selected room exists");
                         else handleError(req, res, 1);
                     }
 
@@ -80,8 +82,9 @@ var isBookQueryOk = async (req, res, roomId, fromDateTime, toDateTime) => {
 
     var currentDateTime = new Date();
 
-    if (roomId == undefined || fromDateTime == "Invalid Date" || toDateTime == "Invalid Date") {
-        handleError(req, res, 2);
+
+    if (roomId == undefined || roomId == "" || fromDateTime == "Invalid Date" || toDateTime == "Invalid Date") {
+        handleError(req, res, 2, "Please check room number, from and to date.");
     }
     else if (currentDateTime > fromDateTime || currentDateTime > toDateTime) {
         handleError(req, res, 2, "Booking date must be after '" + currentDateTime + "'");
