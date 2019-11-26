@@ -4,7 +4,8 @@ var dbConnectionString = {
     host: "localhost",
     user: "root",
     password: "",
-    database: "h3_macl_rest_api"
+    database: "h3_macl_rest_api",
+    timezone: "utc"
 };
 
 exports.connect = async () => {

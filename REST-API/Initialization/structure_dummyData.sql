@@ -68,6 +68,4 @@ INSERT INTO room_bookings (RoomId, StartTime, EndTime)
 
 
 /*
-3. Hvis man sender en POST request til /add kan man tilføje en ny booking til systemet. Hvis det ikke er en POST request skal der ikke ske noget.
-
 4. Lav et id-system for API'en. Den der vil tilgå den skal have en key, som skal sendes med som parameter når man tilgår API'en*/
