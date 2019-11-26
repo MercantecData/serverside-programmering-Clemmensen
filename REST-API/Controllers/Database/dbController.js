@@ -10,11 +10,12 @@ var dbConnectionString = {
 exports.connect = async () => {
     return await new Promise((resolve, reject) => {
         var conn = mysql.createConnection(dbConnectionString);
+
         conn.connect((err) => {
             if (!err) resolve(conn);
             else reject(err);
         });
     }).catch(error => {
-        console.error("An error occured while connecting to database: " + JSON.stringify(err));
+        console.error("An error occured while connecting to database: " + JSON.stringify(error));
     })
 }
