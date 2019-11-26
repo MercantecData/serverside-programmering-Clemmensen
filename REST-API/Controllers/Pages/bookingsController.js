@@ -77,7 +77,7 @@ var addBooking = {
                     return;
                 }
 
-                conn.query("INSERT INTO room_bookings (RoomId, StartTime, EndTime) VALUES (?, ?, ?)", [postData.roomId, postData.fromDateTime, postData.toDateTime], (err, result) => {
+                conn.query("INSERT INTO room_bookings (room_id, start_time, end_time) VALUES (?, ?, ?)", [postData.roomId, postData.fromDateTime, postData.toDateTime], (err, result) => {
 
                     if (err) {
                         console.log(JSON.stringify(err));
@@ -114,8 +114,8 @@ var isBookQueryOk = async (req, res, postData) => {
 
 var getRoomBookings = async (conn, postData) => {
     return await new Promise((resolve, reject) => {
-        conn.query("SELECT * FROM room_bookings WHERE RoomId = ?"
-            + " AND ((StartTime <= ? AND EndTime > ?) OR (StartTime >= ? AND StartTime <= ?))",
+        conn.query("SELECT * FROM room_bookings WHERE room_id = ?"
+            + " AND ((start_time <= ? AND end_time > ?) OR (start_time >= ? AND start_time <= ?))",
             [postData.roomId, postData.fromDateTime, postData.fromDateTime, postData.fromDateTime, postData.toDateTime],
             (err, data) => {
                 if (!err) {
