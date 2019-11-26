@@ -1,4 +1,3 @@
-// TODO: Delete this later
 var url = require("url");
 
 
@@ -49,23 +48,10 @@ var addBooking = {
         var fromDateTime = new Date(parsedUrl.query["fromDateTime"]).toLocaleString();
         var toDateTime = new Date(parsedUrl.query["toDateTime"]).toLocaleString();
 
-        var currentDateTime = new Date();
+        if (await isBookQueryOk(req, res, roomId, fromDateTime, toDateTime)) {
 
-
-        // TODO: Move to method checking input
-        if (roomId == undefined || fromDateTime == "Invalid Date" || toDateTime == "Invalid Date") {
-            handleError(req, res, 2);
-        }
-        else if (currentDateTime > fromDateTime || currentDateTime > toDateTime) {
-            handleError(req, res, 2, "Booking date must be after '" + currentDateTime + "'");
-        }
-        else if (fromDateTime > toDateTime) {
-            handleError(req, res, 2, "End time of booking must be after start time of booking");
-        }
-        else {
-
-            var roomBookings = await getRoomBookings(conn, roomId, fromDateTime, toDateTime);
-                        
+            var roomBookings = await getRoomBookings(conn, roomId, fromDateTime, toDateTime);         
+            
             if (roomBookings == undefined) handleError(req, res, 1);
             else {
 
@@ -88,6 +74,24 @@ var addBooking = {
         }
     }
 };
+
+
+var isBookQueryOk = async (req, res, roomId, fromDateTime, toDateTime) => {
+
+    var currentDateTime = new Date();
+
+    if (roomId == undefined || fromDateTime == "Invalid Date" || toDateTime == "Invalid Date") {
+        handleError(req, res, 2);
+    }
+    else if (currentDateTime > fromDateTime || currentDateTime > toDateTime) {
+        handleError(req, res, 2, "Booking date must be after '" + currentDateTime + "'");
+    }
+    else if (fromDateTime > toDateTime) {
+        handleError(req, res, 2, "End time of booking must be after start time of booking");
+    }
+    else return true;
+    return false;
+}
 
 
 var getRoomBookings = async (conn, roomId, fromDateTime, toDateTime) => {
