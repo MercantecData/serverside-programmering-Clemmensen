@@ -6,11 +6,10 @@ http.createServer((req, res) => {
 
     var currentCookie = cookieHelper.getObject(req.headers["cookie"]);
 
-    var newCookie = ["initialMessage=This cookie will be set", "cookieWasSetAt=" + new Date()]
+    var newCookie = ["initialMessage=This= cookie will be set", "cookieWasSetAt=" + new Date(), "Secure"]
     res.setHeader("Set-Cookie", newCookie);
-    console.log(req.headers["cookie"]);
 
-    res.write("{\"request-cookie\": \"" + currentCookie + "\"");
+    res.write("{\"request-cookie\": " + JSON.stringify(currentCookie));
     res.write(",\"response-cookie\": \"" + newCookie.join(";") + "\"");
     res.end("}");
 
