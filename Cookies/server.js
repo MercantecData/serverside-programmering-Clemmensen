@@ -1,9 +1,17 @@
 var http = require("http");
+var cookieHelper = require("./Helpers/cookieHelper")
 
 http.createServer((req, res) => {
-    res.setHeader("content-type", "text/html");
-    res.setHeader("Set-Cookie", ["initialMessage=This cookie will be set", "secondaryMessage=also set"]);
+    res.setHeader("content-type", "text/json");
 
-    res.end("<h1>Hello there</h1>");
+    var currentCookie = cookieHelper.getObject(req.headers["cookie"]);
+
+    var newCookie = ["initialMessage=This cookie will be set", "cookieWasSetAt=" + new Date()]
+    res.setHeader("Set-Cookie", newCookie);
+    console.log(req.headers["cookie"]);
+
+    res.write("{\"request-cookie\": \"" + currentCookie + "\"");
+    res.write(",\"response-cookie\": \"" + newCookie.join(";") + "\"");
+    res.end("}");
 
 }).listen(8080);
