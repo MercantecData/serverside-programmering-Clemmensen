@@ -9,6 +9,6 @@
     "\\REST-API\\Helpers",
     "\\REST-API\\Initialization"
   ],
-  "SelectedNode": "\\REST-API\\Controllers\\Pages\\bookingsController.js",
+  "SelectedNode": "\\REST-API\\Helpers\\keyHelper.js",
   "PreviewInSolutionExplorer": false
 }

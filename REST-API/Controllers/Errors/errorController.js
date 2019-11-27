@@ -13,6 +13,11 @@ var errorIdTypes = {
         statusCode: 404,
         logToConsole: false,
         errorText: "The requested resource was not found."
+    },
+    4: {
+        statusCode: 400,
+        logToConsole: false,
+        errorText: "The system requires a valid api-key, please provide a header \"api-key\" with a valid key"
     }
 };
 

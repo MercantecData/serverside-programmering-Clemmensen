@@ -20,6 +20,16 @@ CREATE TABLE room_bookings (
     	ON UPDATE CASCADE
 );
 
+CREATE TABLE api_keys (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	keyphrase VARCHAR(32) NOT NULL,
+	company VARCHAR(100),
+	contact_person VARCHAR(100) NOT NULL,
+	contact_email VARCHAR(100) NOT NULL,
+	valid_from DATETIME NOT NULL,
+	valid_to DATETIME NOT NULL
+);
+
 
 /* Stored procedures */
 DROP PROCEDURE IF EXISTS GetBookings;
@@ -63,9 +73,10 @@ INSERT INTO room_bookings (room_id, start_time, end_time)
 			(1, '2019-11-21-8:00', '2019-11-21-10:00'),
 			(2, '2019-11-23-11:00', '2019-11-23-13:00'),
 			(2, '2019-11-23-7:00', '2019-11-23-8:00'),
-			(2, '2018-1-3-7:00', '2019-10-5-8:00'); /* Note <- Good for checking GetBookings on */
+			(2, '2018-1-3-7:00', '2019-10-5-8:00');
 
 
-
-/*
-4. Lav et id-system for API'en. Den der vil tilgå den skal have en key, som skal sendes med som parameter når man tilgår API'en*/
+INSERT INTO api_keys (keyphrase, company, contact_person, contact_email, valid_from, valid_to)
+	VALUES	('0eab900561d45971a79567c251ba7c4b', 'Avengers', 'Tony Stark', 'tony3000@stark-industries.com', '2018-11-26-7:00', '2019-5-25-7:00'),
+			('dc77e33ede3e87c178a0a985a5e1b8a1', 'Guardians of the galaxy', 'Peter Quill', 'peter.quill@starlords.com', '2018-11-26-8:00', '2020-5-25-7:00'),
+			('ac4d082784d62d262738e94e011e8b53', 'Doctor Strange', 'Dr. Strange', 'strange@iam_a_doctor.com', '1900-1-1-1:00', '4900-1-1-1:00');
