@@ -1,14 +1,5 @@
 var url = require("url");
 
-// Converts a time from server to the localtime to reflect UTC times at server correctly.
-exports.utcTimeConvert = function (roomBookings) {
-    roomBookings.forEach((booking) => {
-        booking.StartTime = new Date(booking.StartTime).toLocaleString();
-        booking.EndTime = new Date(booking.EndTime).toLocaleString();
-    });
-}
-
-
 // Fetches the desired query paramaters, but also
 // allows another value to act as a fallback value*
 // Example if endDay for "endDay": "startDay" does not exist
