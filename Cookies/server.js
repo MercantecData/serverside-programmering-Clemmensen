@@ -11,8 +11,6 @@ http.createServer((req, res) => {
     // Set some cookie values and set expire to UTC current time + 10 minutes
 
     var cookieAExpire = (new Date(Date.now() + 1000 * 60 * 60 * 1)).toUTCString();
-    console.log(new Date(Date.now()).toUTCString())
-    console.log(cookieAExpire)
 
     var newCookies = [
         "CookieValueA=Expires \"on " + cookieAExpire + "; Expires=" + cookieAExpire,
