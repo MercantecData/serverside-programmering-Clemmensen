@@ -9,7 +9,11 @@ Finished assignments:
 - Connect til Classroom (Done, no code assignment)
 - Node.JS intro (Done, available under folder Intro - optionally see folder readme)
 - Webserver (Done, see folder Webserver)
-- Rest API (Assignments 1, 2 are done - working on 3 + 4)
+- Rest API (Done)*
+
+
+
+* ! ! ! NOTE: api-key header is required on all requests to the server api.
 
 
 TODO:

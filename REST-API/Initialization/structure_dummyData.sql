@@ -4,20 +4,30 @@ CREATE DATABASE h3_macl_rest_api;
 USE h3_macl_rest_api;
 
 CREATE TABLE rooms (
-	Id INT PRIMARY KEY AUTO_INCREMENT,
-	RoomName VARCHAR(40) NOT NULL,
-	FloorLocation INT NOT NULL
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	room_name VARCHAR(40) NOT NULL,
+	floor_location INT NOT NULL
 );
 
 CREATE TABLE room_bookings (
-	Id INT PRIMARY KEY AUTO_INCREMENT,
-	RoomId INT NOT NULL,
-	StartTime DATETIME NOT NULL,
-	EndTime DATETIME NOT NULL,
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	room_id INT NOT NULL,
+	start_time DATETIME NOT NULL,
+	end_time DATETIME NOT NULL,
     CONSTRAINT FK_roombooking_rooms
-    	FOREIGN KEY (RoomId) REFERENCES rooms(Id)
+    	FOREIGN KEY (room_id) REFERENCES rooms(id)
     	ON DELETE RESTRICT
     	ON UPDATE CASCADE
+);
+
+CREATE TABLE api_keys (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	keyphrase VARCHAR(32) NOT NULL,
+	company VARCHAR(100),
+	contact_person VARCHAR(100) NOT NULL,
+	contact_email VARCHAR(100) NOT NULL,
+	valid_from DATETIME NOT NULL,
+	valid_to DATETIME NOT NULL
 );
 
 
@@ -28,21 +38,21 @@ CREATE PROCEDURE GetBookings(IN startDay INT, startMonth INT, startYear INT, end
 BEGIN
 
 	IF startDay > 0 AND startMonth > 0 AND startYear > 0 THEN
-		SELECT room_bookings.*, rooms.RoomName, rooms.FloorLocation FROM room_bookings
-			INNER JOIN rooms on room_bookings.RoomId = rooms.Id
-			WHERE ((StartTime >= STR_TO_DATE(concat(startYear,startMonth,startDay),'%Y%m%d %h%i'))
-				AND (EndTime <= STR_TO_DATE(concat(endYear,endMonth,endDay),'%Y%m%d %h%i'))) ORDER BY StartTime, room_bookings.RoomId;
+		SELECT room_bookings.*, rooms.room_name, rooms.floor_location FROM room_bookings
+			INNER JOIN rooms on room_bookings.room_id = rooms.id
+			WHERE ((start_time >= STR_TO_DATE(concat(startYear,startMonth,startDay),'%Y%m%d %h%i'))
+				AND (end_time <= STR_TO_DATE(concat(endYear,endMonth,endDay),'%Y%m%d %h%i'))) ORDER BY start_time, room_bookings.room_id;
 	ELSE
-		SELECT room_bookings.*, rooms.RoomName, rooms.FloorLocation FROM room_bookings
-		INNER JOIN rooms on room_bookings.RoomId = rooms.Id
+		SELECT room_bookings.*, rooms.room_name, rooms.floor_location FROM room_bookings
+		INNER JOIN rooms on room_bookings.room_id = rooms.id
 		WHERE (
-			(startDay = 0 OR DAY(StartTime) = startDay
-				OR ((DAY(StartTime) >= startDay) AND (DAY(EndTime) <= endDay) AND startDay != endDay))
-			AND (startMonth = 0 OR MONTH(StartTime) = startMonth
-				OR ((MONTH(StartTime) >= startMonth) AND (MONTH(EndTime) <= endMonth) AND startMonth != endMonth))
-			AND (startYear = 0 OR YEAR(StartTime) = startYear
-				OR ((YEAR(StartTime) >= startYear) AND (YEAR(EndTime) <= endYear) AND startYear != endYear))
-		) ORDER BY StartTime, room_bookings.RoomId;
+			(startDay = 0 OR DAY(start_time) = startDay
+				OR ((DAY(start_time) >= startDay) AND (DAY(end_time) <= endDay) AND startDay != endDay))
+			AND (startMonth = 0 OR MONTH(start_time) = startMonth
+				OR ((MONTH(start_time) >= startMonth) AND (MONTH(end_time) <= endMonth) AND startMonth != endMonth))
+			AND (startYear = 0 OR YEAR(start_time) = startYear
+				OR ((YEAR(start_time) >= startYear) AND (YEAR(end_time) <= endYear) AND startYear != endYear))
+		) ORDER BY start_time, room_bookings.room_id;
 	END IF;		
 
 END //
@@ -50,10 +60,10 @@ DELIMITER ;
 
 
 /* Dummy data */
-INSERT INTO rooms (RoomName, FloorLocation)
+INSERT INTO rooms (room_name, floor_location)
 	VALUES ('Windows', 0), ('Beatles', 0), ('Linus Torvalds [A1.41]', 1), ('A1.40', 1), ('A1.39 (Glas)', 1), ('A1.38 (firkantet)', 1);
 
-INSERT INTO room_bookings (RoomId, StartTime, EndTime)
+INSERT INTO room_bookings (room_id, start_time, end_time)
 	VALUES	(1, '2018-11-20-12:00', '2018-11-20-13:00'),
 			(1, '2019-10-20-13:00', '2019-10-20-15:00'),
 			(1, '2019-11-20-8:00', '2019-11-20-10:00'),
@@ -63,11 +73,10 @@ INSERT INTO room_bookings (RoomId, StartTime, EndTime)
 			(1, '2019-11-21-8:00', '2019-11-21-10:00'),
 			(2, '2019-11-23-11:00', '2019-11-23-13:00'),
 			(2, '2019-11-23-7:00', '2019-11-23-8:00'),
-			(2, '2018-1-3-7:00', '2019-10-5-8:00'); /* Note <- Good for checking GetBookings on */
+			(2, '2018-1-3-7:00', '2019-10-5-8:00');
 
 
-
-/*
-3. Hvis man sender en POST request til /add kan man tilføje en ny booking til systemet. Hvis det ikke er en POST request skal der ikke ske noget.
-
-4. Lav et id-system for API'en. Den der vil tilgå den skal have en key, som skal sendes med som parameter når man tilgår API'en*/
+INSERT INTO api_keys (keyphrase, company, contact_person, contact_email, valid_from, valid_to)
+	VALUES	('0eab900561d45971a79567c251ba7c4b', 'Avengers', 'Tony Stark', 'tony3000@stark-industries.com', '2018-11-26-7:00', '2019-5-25-7:00'),
+			('dc77e33ede3e87c178a0a985a5e1b8a1', 'Guardians of the galaxy', 'Peter Quill', 'peter.quill@starlords.com', '2018-11-26-8:00', '2020-5-25-7:00'),
+			('ac4d082784d62d262738e94e011e8b53', 'Doctor Strange', 'Dr. Strange', 'strange@iam_a_doctor.com', '1900-1-1-1:00', '4900-1-1-1:00');
