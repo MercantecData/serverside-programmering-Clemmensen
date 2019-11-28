@@ -13,7 +13,7 @@ http.createServer((req, res) => {
     var cookieAExpire = (new Date(Date.now() + 1000 * 60 * 60 * 1)).toUTCString();
 
     var newCookies = [
-        "CookieValueA=Expires on " + cookieAExpire + "; Expires=" + cookieAExpire,
+        "CookieValueA=Expires \"on " + cookieAExpire + "; Expires=" + cookieAExpire,
         "CookieValueB=Expires on browser close",
         "CookieValueC=Max-Age is " + settingsServer.cookieMaxAge + "; Max-Age=" + settingsServer.cookieMaxAge 
     ]
@@ -21,7 +21,7 @@ http.createServer((req, res) => {
     res.setHeader("Set-Cookie", newCookies);
 
     res.write("{\"request-cookie\": " + JSON.stringify(currentCookie));
-    res.write(",\"response-cookie\": \"" + newCookies.join(";") + "\"");
+    res.write(",\"response-cookie\": \"" + newCookies.join(";").replace(/["]/g, escape('"')) + "\"");
     res.end("}");
 
 }).listen(8080);

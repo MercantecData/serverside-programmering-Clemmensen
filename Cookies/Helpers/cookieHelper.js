@@ -1,4 +1,3 @@
-/// A
 exports.getObject = (cookieString) => {
 
     var cookieObject = { "NonValuePairEntries": [] };
@@ -16,7 +15,7 @@ exports.getObject = (cookieString) => {
         var keyValuePair = cookieEntry.split(/[=]/g);
 
         if (keyValuePair.length == 2) {
-            cookieObject[keyValuePair[0]] = keyValuePair[1];
+            cookieObject[keyValuePair[0]] = keyValuePair[1].replace(/["]/g, escape('"'));
         }
 
         else {
