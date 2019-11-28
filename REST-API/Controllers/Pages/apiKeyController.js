@@ -37,12 +37,9 @@ var addApiKey = {
                 res.end("Sorry, some fields was missing data in the post request - please check that all fields are set");
             }
 
-            // Validate not a dublicate entry / request
-
             var keyPhrase = keyHelper.getNewKey();
-            var validFrom = (new Date()).toUTCString();
-            var validTo = (new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 365)).toUTCString();
-
+            var validFrom = getUtcSqlTimeStamp();
+            var validTo = getUtcSqlTimeStamp(60 * 60 * 24 * 366);
 
             conn.query("INSERT INTO api_keys (keyphrase, company, contact_person, contact_email, valid_from, valid_to) VALUES (?, ?, ?, ?, ?, ?);",
                 [keyPhrase, postData["company"], postData["contact_person"], postData["contact_email"], validFrom, validTo], (err, result) => {
@@ -63,6 +60,13 @@ var addApiKey = {
         else handleError(req, res, 2, "The data sent with the api key formular was faulty");
     }
 };
+
+
+var getUtcSqlTimeStamp = (addSeconds = 0) => {
+    var date = new Date(new Date().getTime() + addSeconds*1000);
+    return date.getUTCFullYear() + "-" + date.getUTCMonth() + "-" + date.getUTCDate() + " "
+        + date.getUTCHours() + ":" + date.getUTCMinutes() + ":" + date.getUTCSeconds();
+}
 
 
 var apiSubQueries = {
