@@ -64,7 +64,7 @@ var addApiKey = {
 
 var getUtcSqlTimeStamp = (addSeconds = 0) => {
     var date = new Date(new Date().getTime() + addSeconds*1000);
-    return date.getUTCFullYear() + "-" + date.getUTCMonth() + "-" + date.getUTCDate() + " "
+    return date.getUTCFullYear() + "-" + (date.getUTCMonth()+1) + "-" + date.getUTCDate() + " "
         + date.getUTCHours() + ":" + date.getUTCMinutes() + ":" + date.getUTCSeconds();
 }
 
