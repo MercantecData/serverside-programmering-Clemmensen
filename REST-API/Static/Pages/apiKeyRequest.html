@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+    <head>
+        <title>REST API - Request api key page</title>
+    </head>
+    <body>
+
+        <div>
+            Please use the below form to request an api key<br><br>
+            Api Key is generated dynamically and has a default lifetime of one year)<br><br>
+        </div>
+        <div>
+            <form method="post" action="/api-key/add">
+                Company: <input type="text" name="company">*<br>
+                Contact person: <input type="text" name="contact_person">*<br>
+                Contact e-mail: <input type="text" name="contact_email">*<br>
+                <input type="submit" value="Request api key"><br>
+                * Required fields
+            </form>
+        </div>
+    </body>
+
+
+</html>
