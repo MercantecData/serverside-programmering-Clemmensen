@@ -1,3 +1,5 @@
+var serverSettingsConfig = require("../../serverSettings").config;
+
 var errorIdTypes = {
     1: {
         statusCode: 500,
@@ -15,9 +17,9 @@ var errorIdTypes = {
         errorText: "The requested resource was not found."
     },
     4: {
-        statusCode: 400,
+        statusCode: 403,
         logToConsole: false,
-        errorText: "The system requires a valid api-key, please provide a header \"api-key\" with a valid key"
+        errorText: "The system requires a valid api-key, please provide a header " + escape('"api-key"') + " with a valid key"
     }
 };
 
@@ -33,13 +35,17 @@ exports.handleError = (req, res, errorId, errorDetails) => {
     else if (errorIdTypes[errorId].logToConsole) {
         console.error("\n" + errorIdTypes[errorId].statusCode + ", request caused at url: '"
             + req.url + "',\n\t- error details: " + JSON.stringify(errorDetails ? errorDetails : ""));
-    }    
+    }
 
-    res.end("{"
-        + "\"Result\": \"Error\","
-        + "\"InternalErrorId\": " + errorId + ","
-        + "\"Reason\": \"" + errorIdTypes[errorId].errorText + "\","
-        + "\"Details\": " + JSON.stringify(errorDetails ? errorDetails : "") + ","
-        + "\"Data\": {}"
-    +"}");
+    res.statusCode = errorIdTypes[errorId].statusCode;
+
+    if (serverSettingsConfig.showBasicErrorDescriptionOnProduction)
+        res.end("{"
+            + "\"Result\": \"Error\","
+            + "\"InternalErrorId\": " + errorId + ","
+            + "\"Reason\": \"" + errorIdTypes[errorId].errorText + "\","
+            + "\"Details\": " + JSON.stringify(errorDetails ? errorDetails : "") + ","
+            + "\"Data\": {}"
+            + "}");
+    else res.end();
 }

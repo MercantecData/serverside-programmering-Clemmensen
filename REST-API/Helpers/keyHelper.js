@@ -2,7 +2,10 @@ var handleError = require("../Controllers/Errors/errorController").handleError;
 
 exports.isKeyValid = (req, res, conn) => {
 
-    return conn.query("SELECT * FROM api_keys WHERE keyphrase = ? AND valid_from <= NOW() AND valid_to >= NOW() LIMIT 1",
+    if (req.headers["api-key"] == undefined)
+        handleError(req, res, 4);
+
+    else return conn.query("SELECT * FROM api_keys WHERE keyphrase = ? AND valid_from <= NOW() AND valid_to >= NOW() LIMIT 1",
         req.headers["api-key"], (err, data) => {
 
             var successAuthentification = false;
