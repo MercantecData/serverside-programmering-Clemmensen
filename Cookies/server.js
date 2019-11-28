@@ -1,16 +1,27 @@
 var http = require("http");
 var cookieHelper = require("./Helpers/cookieHelper")
+var settingsServer = require("./settings").server;
 
 http.createServer((req, res) => {
-    res.setHeader("content-type", "text/json");
+    res.setHeader("content-type", settingsServer.defaultContentType);
 
     var currentCookie = cookieHelper.getObject(req.headers["cookie"]);
 
-    var newCookie = ["initialMessage=This= cookie will be set", "cookieWasSetAt=" + new Date(), "Secure"]
-    res.setHeader("Set-Cookie", newCookie);
+    
+    // Set some cookie values and set expire to UTC current time + 10 minutes
+
+    var cookieAExpire = (new Date(Date.now() + 1000 * 60 * 60 * 1)).toUTCString();
+
+    var newCookies = [
+        "CookieValueA=Expires on " + cookieAExpire + "; Expires=" + cookieAExpire,
+        "CookieValueB=Expires on browser close",
+        "CookieValueC=Max-Age is " + settingsServer.cookieMaxAge + "; Max-Age=" + settingsServer.cookieMaxAge 
+    ]
+
+    res.setHeader("Set-Cookie", newCookies);
 
     res.write("{\"request-cookie\": " + JSON.stringify(currentCookie));
-    res.write(",\"response-cookie\": \"" + newCookie.join(";") + "\"");
+    res.write(",\"response-cookie\": \"" + newCookies.join(";") + "\"");
     res.end("}");
 
 }).listen(8080);
