@@ -35,6 +35,8 @@ var isBodyJSON = (bodyData) => {
 }
 
 var convertBodyToJson = (bodyData) => {
+    bodyData = unescape(bodyData.replace(/[+]/g, " "));
+
     var bodyObject = {};
     var bodyDataParts = bodyData.split(/[&]/g);
     for (var bodyDataPart of bodyDataParts) {
