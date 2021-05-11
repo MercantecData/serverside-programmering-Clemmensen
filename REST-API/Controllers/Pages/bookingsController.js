@@ -48,7 +48,7 @@ var addBooking = {
         var postData = {};
 
         if (useBodyForPostRequest) {
-            var postReceivedData = await requestHelper.getPostBody(req, res);
+            var postReceivedData = await requestHelper.getPostBodyJSON(req, res);
             if (postData == undefined) return;
 
             // Transfer the received data (To avoid altering datatype from string to date)

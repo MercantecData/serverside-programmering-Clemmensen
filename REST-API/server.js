@@ -19,8 +19,13 @@ var main = async () => {
     http.createServer((req, res) => {
         res.setHeader("content-type", "text/json");
 
+        // Allow people to access api-key page for requesting a key
+        var baseRequest = "/" + req.url.split("?")[0].split("/")[1];
+        if (baseRequest == "/" || baseRequest == "/api-key")
+            pageController.handleQuery(req, res, conn);
+
         // Lock the API to require an api-key authentification/validation
-        if (keyHelper.isKeyValid(req, res, conn)) pageController.handleQuery(req, res, conn);
+        else if (keyHelper.isKeyValid(req, res, conn)) pageController.handleQuery(req, res, conn);
 
     }).listen(8080);
 }

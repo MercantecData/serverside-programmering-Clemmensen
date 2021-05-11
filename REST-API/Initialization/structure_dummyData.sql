@@ -25,7 +25,7 @@ CREATE TABLE api_keys (
 	keyphrase VARCHAR(32) NOT NULL,
 	company VARCHAR(100),
 	contact_person VARCHAR(100) NOT NULL,
-	contact_email VARCHAR(100) NOT NULL,
+	contact_email VARCHAR(100) UNIQUE NOT NULL,
 	valid_from DATETIME NOT NULL,
 	valid_to DATETIME NOT NULL
 );

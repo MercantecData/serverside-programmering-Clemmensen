@@ -3,6 +3,18 @@ Startup guide:
 Use ./Initialization/structure_dummyData.sql to create tables, view and insert dummy data.
 Server is configured to listen on 8080 - see ./Controllers/Database/dbController.js for settings
 
+
+API key request:
+----------------
+Visiting / and requesting an api key will result in a confirmation that a key has been created if all fields are filled out.
+- This can be accessed on both root "/" and "/api-key" these pages and subpages under /api-key like /api-key/add does not require an api key.
+
+Production mode:
+----------------
+Under ./serverSettings.js please set "showBasicErrorDescriptionOnProduction" to
+false if no details about the error cause should be sent to the browser
+
+
 Usage:
 ------
 Configure the browser or client application (suggestion: Postman) to send a api-key header from structure_dummyData.sql
